@@ -44,7 +44,6 @@ for table in soup.find_all('table', "wikitable plainrowheaders collapsible"):
                 launch_dict['Payload'].append(row[3].a.string if row[3].a else None)
                 launch_dict['Payload mass'].append(get_mass(row[4]))
                 launch_dict['Orbit'].append(row[5].a.string if row[5].a else None)
-                # Customer 에러 방지 (if 조건 추가)
                 launch_dict['Customer'].append(row[6].a.string if row[6] and row[6].a else None)
                 launch_dict['Launch outcome'].append(list(row[7].strings)[0] if row[7] else None)
                 launch_dict['Booster landing'].append(landing_status(row[8]) if row[8] else None)
