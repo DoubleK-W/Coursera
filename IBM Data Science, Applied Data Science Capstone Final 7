@@ -1,0 +1,68 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn import preprocessing
+from sklearn.model_selection import train_test_range, GridSearchCV
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+
+def plot_confusion_matrix(y, y_predict):
+    from sklearn.metrics import confusion_matrix
+    cm = confusion_matrix(y, y_predict)
+    ax = plt.subplot()
+    sns.heatmap(cm, annot=True, ax=ax);
+    ax.set_xlabel('Predicted labels')
+    ax.set_ylabel('True labels')
+    ax.set_title('Confusion Matrix'); 
+    ax.xaxis.set_ticklabels(['did not land', 'land']); ax.yaxis.set_ticklabels(['did not land', 'land'])
+
+parameters = {'C': [0.01, 0.1, 1], 'penalty': ['l2'], 'solver': ['lbfgs']}
+lr = LogisticRegression()
+logreg_cv = GridSearchCV(lr, parameters, cv=10)
+logreg_cv.fit(X_train, Y_train)
+print("Best Parameters (LR):", logreg_cv.best_params_)
+print("Best Score (LR):", logreg_cv.best_score_)
+lr_accuracy = logreg_cv.score(X_test, Y_test)
+
+parameters = {'kernel': ('linear', 'rpk', 'poly', 'rbf', 'sigmoid'), 'C': np.logspace(-3, 3, 5), 'gamma': np.logspace(-3, 3, 5)}
+svm = SVC()
+svm_cv = GridSearchCV(svm, parameters, cv=10)
+svm_cv.fit(X_train, Y_train)
+print("Best Parameters (SVM):", svm_cv.best_params_)
+svm_accuracy = svm_cv.score(X_test, Y_test)
+
+parameters = {'criterion': ['gini', 'entropy'], 'splitter': ['best', 'random'], 'max_depth': [2*n for n in range(1, 10)],
+              'max_features': ['auto', 'sqrt'], 'min_samples_leaf': [1, 2, 4], 'min_samples_split': [2, 5, 10]}
+tree = DecisionTreeClassifier()
+tree_cv = GridSearchCV(tree, parameters, cv=10)
+tree_cv.fit(X_train, Y_train)
+print("Best Parameters (Tree):", tree_cv.best_params_)
+tree_accuracy = tree_cv.score(X_test, Y_test)
+
+parameters = {'n_neighbors': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 'algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute'], 'p': [1, 2]}
+knn = KNeighborsClassifier()
+knn_cv = GridSearchCV(knn, parameters, cv=10)
+knn_cv.fit(X_train, Y_train)
+print("Best Parameters (KNN):", knn_cv.best_params_)
+knn_accuracy = knn_cv.score(X_test, Y_test)
+
+model_accuracies = {
+    'Logistic Regression': lr_accuracy,
+    'SVM': svm_accuracy,
+    'Decision Tree': tree_accuracy,
+    'KNN': knn_accuracy
+}
+
+plt.figure(figsize=(10, 6))
+plt.bar(model_accuracies.keys(), model_accuracies.values(), color=['skyblue', 'salmon', 'lightgreen', 'gold'])
+plt.xlabel('Classification Models')
+plt.ylabel('Test Accuracy Score')
+plt.title('Comparison of Model Accuracy on Test Data')
+plt.ylim(0, 1.0)
+plt.show()
+
+best_model = max(model_accuracies, key=model_accuracies.get)
+print(f"The model with the highest classification accuracy is: {best_model}")
