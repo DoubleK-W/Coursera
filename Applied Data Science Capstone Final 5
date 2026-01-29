@@ -1,0 +1,39 @@
+import pandas as pd
+import sqlite3
+
+conn = sqlite3.connect("my_data1.db")
+df.to_sql("SPACEXTABLE", conn, if_exists='replace', index=False)
+
+
+# Task 1
+t1 = %sql SELECT DISTINCT "Launch_Site" FROM SPACEXTABLE;
+
+# Task 2
+t2 = %sql SELECT * FROM SPACEXTABLE WHERE "Launch_Site" LIKE 'CCA%' LIMIT 5;
+
+# Task 3
+t3 = %sql SELECT SUM("PAYLOAD_MASS__KG_") AS "Total_Payload_Mass" FROM SPACEXTABLE WHERE "Customer" = 'NASA (CRS)';
+
+# Task 4
+t4 = %sql SELECT AVG("PAYLOAD_MASS__KG_") AS "Average_Payload_Mass" FROM SPACEXTABLE WHERE "Booster_Version" = 'F9 v1.1';
+
+# Task 5
+t5 = %sql SELECT MIN("Date") AS "First_Success_Date" FROM SPACEXTABLE WHERE "Landing_Outcome" = 'Success (ground pad)';
+
+# Task 6
+t6 = %sql SELECT "Booster_Version" FROM SPACEXTABLE WHERE "Landing_Outcome" = 'Success (drone ship)' AND "PAYLOAD_MASS__KG_" BETWEEN 4000 AND 6000;
+
+# Task 7
+t7 = %sql SELECT "Mission_Outcome", COUNT(*) AS "Count" FROM SPACEXTABLE GROUP BY "Mission_Outcome";
+
+# Task 8
+t8 = %sql SELECT DISTINCT "Booster_Version" FROM SPACEXTABLE WHERE "PAYLOAD_MASS__KG_" = (SELECT MAX("PAYLOAD_MASS__KG_") FROM SPACEXTABLE);
+
+# Task 9
+t9 = %sql SELECT substr(Date, 6, 2) AS Month, Landing_Outcome, Booster_Version, Launch_Site FROM SPACEXTABLE WHERE Landing_Outcome = 'Failure (drone ship)' AND substr(Date, 1, 4) = '2015';
+
+# Task 10
+%config SqlMagic.style = 'PLAIN'
+t10 = %sql SELECT "Landing_Outcome", COUNT(*) AS "Outcome_Count" FROM SPACEXTABLE WHERE "Date" BETWEEN '2010-06-04' AND '2017-03-20' GROUP BY "Landing_Outcome" ORDER BY "Outcome_Count" DESC;
+
+conn.close()
