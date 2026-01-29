@@ -1,0 +1,49 @@
+import folium
+import pandas as pd
+from math import sin, cos, sqrt, atan2, radians
+
+def calculate_distance(lat1, lon1, lat2, lon2):
+    # Standard Earth radius (km)
+    R = 6371.0 
+    
+    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    return R * c
+
+launch_site_pos = [28.562302, -80.577356]
+site_map = folium.Map(location=launch_site_pos, zoom_start=15)
+
+circle = folium.Circle(launch_site_pos, radius=1000, color='#d35400', fill=True).add_child(folium.Popup('SpaceX SLC-40'))
+marker = folium.Marker(launch_site_pos, icon=folium.Icon(color='red', icon='info-sign'))
+site_map.add_child(circle)
+site_map.add_child(marker)
+
+proximities = {
+    'Coastline': [28.56367, -80.56802],
+    'Highway': [28.56335, -80.57085],
+    'Railway': [28.57206, -80.58525]
+}
+
+colors = {'Coastline': 'blue', 'Highway': 'red', 'Railway': 'green'}
+
+for name, target_pos in proximities.items():
+    dist = calculate_distance(launch_site_pos[0], launch_site_pos[1], target_pos[0], target_pos[1])
+    
+    distance_marker = folium.Marker(
+        target_pos,
+        icon=folium.DivIcon(
+            icon_size=(20,20),
+            icon_anchor=(0,0),
+            html=f'<div style="font-size: 12pt; color:{colors[name]};"><b>{dist:.2f} KM</b></div>',
+        )
+    )
+    site_map.add_child(distance_marker)
+    
+    line = folium.PolyLine(locations=[launch_site_pos, target_pos], weight=2, color=colors[name])
+    site_map.add_child(line)
+
+site_map
