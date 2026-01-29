@@ -1,0 +1,51 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import sqlite3
+
+df = pd.read_csv('dataset_part_2.csv') 
+
+# Flight Number vs Launch Site (Scatter)
+sns.catplot(y="LaunchSite", x="FlightNumber", hue="Class", data=df, aspect=5)
+plt.title("Flight Number vs Launch Site", fontsize=20)
+plt.show()
+
+# Payload Mass vs Launch Site (Scatter)
+sns.catplot(y="LaunchSite", x="PayloadMass", hue="Class", data=df, aspect=5)
+plt.title("Payload Mass vs Launch Site", fontsize=20)
+plt.show()
+
+# Success Rate by Orbit Type (Bar)
+df_orbit = df.groupby('Orbit')['Class'].mean().reset_index()
+sns.barplot(x='Orbit', y='Class', data=df_orbit, hue='Orbit', palette='viridis', legend=False)
+plt.title("Success Rate by Orbit Type", fontsize=20)
+plt.show()
+
+# Flight Number vs Orbit Type (Scatter)
+sns.catplot(y="Orbit", x="FlightNumber", hue="Class", data=df, aspect=5)
+plt.title("Relationship between Flight Number and Orbit Type", fontsize=20)
+plt.show()
+
+# Payload Mass vs Orbit Type (Scatter)
+sns.catplot(y="Orbit", x="PayloadMass", hue="Class", data=df, aspect=5)
+plt.title("Relationship between Payload Mass and Orbit Type", fontsize=20)
+plt.show()
+
+# Success Rate Trend by Year (Line)
+def extract_year(date_list):
+    return [i.split("-")[0] for i in date_list]
+
+df['Year'] = extract_year(df['Date'])
+df_year = df.groupby('Year')['Class'].mean().reset_index()
+sns.lineplot(x='Year', y='Class', data=df_year)
+plt.title("Success Rate Trend by Year", fontsize=20)
+plt.show()
+
+features = df[['FlightNumber', 'PayloadMass', 'Orbit', 'LaunchSite', 'Flights', 'GridFins', 'Reused', 'Legs', 'LandingPad', 'Block', 'ReusedCount', 'Serial']]
+
+features_one_hot = pd.get_dummies(features, columns=['Orbit', 'LaunchSite', 'LandingPad', 'Serial'])
+
+features_one_hot = features_one_hot.astype('float64')
+
+print(features_one_hot.head())
