@@ -1,0 +1,9 @@
+payload_mean = df['PayloadMass'].mean()
+df['PayloadMass'].replace(np.nan, payload_mean, inplace=True)
+
+df['Class'] = [1 if 'Success' in outcome else 0 for outcome in df['Outcome']]
+
+success_rate = df["Class"].mean()
+print(f"Mean of Class: {success_rate}")
+
+df.to_csv("dataset_part_2.csv", index=False)
